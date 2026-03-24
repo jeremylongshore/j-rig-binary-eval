@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.5] - 2026-03-24
+
+- docs: add Epic 03 reference file (package integrity and deterministic checks) (ebef9ec)
+
+
 ## [v0.2.4] - 2026-03-24
 
 - docs: add Epic 02 reference file (spec layer and contract system) (eaa919b)
