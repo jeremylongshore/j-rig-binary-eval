@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.6] - 2026-03-24
+
+- docs: add Epic 04 reference file (evidence layer, persistence, run lifecycle) (8dfa539)
+
+
 ## [v0.2.5] - 2026-03-24
 
 - docs: add Epic 03 reference file (package integrity and deterministic checks) (ebef9ec)
