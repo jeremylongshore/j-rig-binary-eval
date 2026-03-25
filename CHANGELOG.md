@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.11] - 2026-03-25
+
+- chore: update FUNDING.yml with GitHub Sponsors + Buy Me a Coffee (ac8ff72)
+
+
 ## [v0.2.10] - 2026-03-25
 
 - chore: update FUNDING.yml with GitHub Sponsors + Buy Me a Coffee (55ea090)
