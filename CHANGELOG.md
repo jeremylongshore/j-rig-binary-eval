@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.10] - 2026-03-25
+
+- chore: update FUNDING.yml with GitHub Sponsors + Buy Me a Coffee (55ea090)
+
+
 ## [v0.2.9] - 2026-03-25
 
 - docs: add release report for v0.2.7 (91e6221)
