@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.6.0] - 2026-03-29
+
+- Merge pull request #7 from jeremylongshore/feature/epic-04-evidence-layer-persistence-and-run-lifecycle (1437524)
+- docs(epic-04): add epic 04 after action report (2153d81)
+- test(epic-04): add evidence persistence and lifecycle tests (7ad209c)
+- feat(epic-04): add SQLite evidence layer with run lifecycle (102a86a)
+
+
 ## [v0.5.0] - 2026-03-29
 
 - Merge pull request #6 from jeremylongshore/feature/epic-03-package-integrity-and-deterministic-checks (bbdac59)
