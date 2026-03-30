@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.10.0] - 2026-03-30
+
+- Merge pull request #11 from jeremylongshore/feature/epic-08-regression-baseline-scoring-cli (499c95a)
+- docs(epic-08): add epic 08 after action report (90dd6c0)
+- feat(epic-08): add regression, baseline, scoring, and launch reports (bdffce6)
+
+
 ## [v0.9.0] - 2026-03-30
 
 - Merge pull request #10 from jeremylongshore/feature/epic-07-judgment-layer-and-model-matrix (f7ef171)
