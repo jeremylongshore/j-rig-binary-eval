@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.11.0] - 2026-03-30
+
+- Merge pull request #12 from jeremylongshore/feature/epic-09-optimizer-and-experiment-engine (1e6762e)
+- feat(epic-09): add optimizer with failure clustering and experiment engine (1cc802b)
+
+
 ## [v0.10.0] - 2026-03-30
 
 - Merge pull request #11 from jeremylongshore/feature/epic-08-regression-baseline-scoring-cli (499c95a)
