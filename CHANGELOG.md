@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.8.0] - 2026-03-30
+
+- Merge pull request #9 from jeremylongshore/feature/epic-06-functional-execution-and-observation (6aede90)
+- docs(epic-06): add epic 06 after action report (69d31d3)
+- feat(epic-06): add functional execution harness and observation layer (42921d3)
+
+
 ## [v0.7.0] - 2026-03-30
 
 - Merge pull request #8 from jeremylongshore/feature/epic-05-trigger-harness-and-skill-roster-simulation (6807a73)
