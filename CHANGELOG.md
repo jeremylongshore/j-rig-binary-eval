@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.13.0] - 2026-03-30
+
+- feat: align skill validation with Anthropic best practices (2026) (06171dd)
+
+
 ## [v0.12.0] - 2026-03-30
 
 - Merge pull request #13 from jeremylongshore/feature/epic-10-team-product-eval-packs-drift (dbe8c53)
