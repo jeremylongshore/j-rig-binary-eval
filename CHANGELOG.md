@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.14.0] - 2026-04-01
+
+- chore(deps-dev): bump typescript-eslint from 8.57.2 to 8.58.0 (#16) (d211fd2)
+- chore(deps): bump pnpm/action-setup from 4 to 5 (#15) (d8f8dc9)
+- feat(cli): wire up 6 CLI commands for evaluation harness (#14) (ab71522)
+
+
 ## [v0.13.0] - 2026-03-30
 
 - feat: align skill validation with Anthropic best practices (2026) (06171dd)
