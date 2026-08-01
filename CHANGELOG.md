@@ -40,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `unsure` fails closed while remaining auditable. Runner errors and timeouts
   cannot be graded.
 
+- **Balanced execution sampling and uncertainty:** `j-rig sample-plan` creates
+  round-robin target-N top-ups across explicit Task × Config × Model cells;
+  completed Runs count, active Runs reserve slots, and harness failures are
+  replaced without being misreported as model failures. Selected Grade
+  snapshots expose pass rate, Wilson intervals, harness failures, ungraded
+  completions, and score standard error without heterogeneous rollups.
+
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add
   `skill-creator` after its hand-authored `eval-spec.yaml` landed
   ([#234](https://github.com/jeremylongshore/j-rig-skill-binary-eval/pull/234)).
