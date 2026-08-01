@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **EvalSpec identity and kernel currency:** the skill-shaped J-Rig profile is
+  now named `SkillEvalSpec` throughout the runtime/CLI surface, while the
+  canonical kernel contract remains `EvalSpec`. All active package pins,
+  evidence tooling, and the refiner consumed-kernel constant move to
+  `@intentsolutions/core@0.10.0`; the profile-to-kernel adapter remains the
+  next substrate step.
+
 ### Added
 
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add

@@ -3,12 +3,12 @@ export { CriterionSchema, CriterionMethod, type Criterion } from "./criterion.js
 export { TestCaseSchema, TestCaseTier, TriggerExpectation, type TestCase } from "./test-case.js";
 
 export {
-  EvalSpecSchema,
+  SkillEvalSpecSchema,
   ModelTarget,
   SiblingSkillSchema,
-  type EvalSpec,
+  type SkillEvalSpec,
   type SiblingSkill,
-} from "./eval-spec.js";
+} from "./skill-eval-spec.js";
 
 export { SelfTestSchema, SELF_TEST_CRITERION_ID, type SelfTest } from "./self-test.js";
 
