@@ -29,8 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   named task/config/model/sample through a shell-free `ExecutableRunner`, stores
   an idempotent `raw_runs` record before execution, retains runner failures and
   timeouts distinctly from completed output, and records content-addressed raw
-  artifact references. Grading, regrade, balanced sampling, and reports remain
+  artifact references. Balanced sampling, suites, and reports remain
   downstream evolution slices.
+
+- **Named Graders and immutable Grade snapshots:** `j-rig grade` evaluates a
+  completed raw Run with a versioned deterministic checker, stores the exact
+  definition and digest, and preserves prior judgments when `--regrade` adds a
+  new version. Runner errors and timeouts cannot be graded.
 
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add
   `skill-creator` after its hand-authored `eval-spec.yaml` landed

@@ -39,6 +39,7 @@ j-rig check <skill-dir>              # deterministic package-integrity checks
 j-rig validate <eval-spec.yaml>      # validate an eval spec / contract YAML
 j-rig eval <skill-dir> --spec ...    # binary evaluation (5 of 7 layers by default; regression + baseline are opt-in)
 j-rig run --task ... --config ...     # generic shell-free task/config raw Run
+j-rig grade --run-id ... --grader ... # deterministic named Grade over a completed Run
 j-rig report                         # show results from the SQLite evidence DB
 j-rig optimize                       # cluster failures, propose one change
 j-rig drift                          # check whether a skill needs reevaluation
@@ -55,6 +56,12 @@ JSON request to a shell-free harness, and persists an idempotent raw Run before
 any grading. It retains stdout/stderr for completed, runner-error, and timeout
 outcomes. See `000-docs/031-AT-SPEC-generic-runner-config-raw-run-2026-08-01.md`
 for the request and environment protocol.
+
+`j-rig grade` evaluates a completed raw Run with a validated, versioned grader
+definition and stores an immutable snapshot. Pass `--regrade` to intentionally
+add a new version of an existing named Grader; runner errors and timeouts are
+not gradeable. See
+`000-docs/032-AT-SPEC-named-graders-snapshots-regrade-2026-08-01.md`.
 
 ## Providers
 
