@@ -40,6 +40,7 @@ j-rig validate <eval-spec.yaml>      # validate an eval spec / contract YAML
 j-rig eval <skill-dir> --spec ...    # binary evaluation (5 of 7 layers by default; regression + baseline are opt-in)
 j-rig run --task ... --config ...     # generic shell-free task/config raw Run
 j-rig grade --run-id ... --grader ... # deterministic named Grade over a completed Run
+j-rig sample-plan --manifest ...      # balanced target-N top-up plan
 j-rig report                         # show results from the SQLite evidence DB
 j-rig optimize                       # cluster failures, propose one change
 j-rig drift                          # check whether a skill needs reevaluation
@@ -62,6 +63,11 @@ definition and stores an immutable snapshot. Pass `--regrade` to intentionally
 add a new version of an existing named Grader; runner errors and timeouts are
 not gradeable. See
 `000-docs/032-AT-SPEC-named-graders-snapshots-regrade-2026-08-01.md`.
+
+`j-rig sample-plan` reads a YAML manifest of explicit Task × Config × Model
+cells and reports the next balanced sample indices needed to reach `--target-n`.
+It does not execute the harness; the suite/batch workflow will consume these
+jobs. See `000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`.
 
 ## Providers
 
