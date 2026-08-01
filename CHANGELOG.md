@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   snapshots expose pass rate, Wilson intervals, harness failures, ungraded
   completions, and score standard error without heterogeneous rollups.
 
+- **Unified report projection:** `j-rig report --unified` emits versioned
+  `j-rig/unified-report/v1` JSON or Markdown for one selected immutable Grader
+  snapshot, preserving per-cell uncertainty and raw Run lineage. It is local
+  unsigned output; dashboard verification and publication remain downstream.
+
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add
   `skill-creator` after its hand-authored `eval-spec.yaml` landed
   ([#234](https://github.com/jeremylongshore/j-rig-skill-binary-eval/pull/234)).

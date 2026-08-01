@@ -41,6 +41,7 @@ j-rig eval <skill-dir> --spec ...    # binary evaluation (5 of 7 layers by defau
 j-rig run --task ... --config ...     # generic shell-free task/config raw Run
 j-rig grade --run-id ... --grader ... # deterministic named Grade over a completed Run
 j-rig sample-plan --manifest ...      # balanced target-N top-up plan
+j-rig report --unified ...            # selected-Grader JSON/Markdown report
 j-rig report                         # show results from the SQLite evidence DB
 j-rig optimize                       # cluster failures, propose one change
 j-rig drift                          # check whether a skill needs reevaluation
@@ -68,6 +69,13 @@ not gradeable. See
 cells and reports the next balanced sample indices needed to reach `--target-n`.
 It does not execute the harness; the suite/batch workflow will consume these
 jobs. See `000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`.
+
+`j-rig report --unified` requires `--grader-id`, `--grader-version`, and the
+full `--grader-snapshot-sha256`. It emits `j-rig/unified-report/v1` JSON with
+`--json` or terminal-friendly Markdown otherwise; `--output` writes the exact
+projection to a file. This is unsigned local output, not a dashboard ingest or
+rollout decision. See
+`000-docs/034-AT-SPEC-unified-report-json-markdown-2026-08-01.md`.
 
 ## Providers
 

@@ -1,8 +1,44 @@
 import type { Command } from "commander";
 import chalk from "chalk";
-import { getRun, getRecentRuns, getRunResults, getRunArtifacts } from "@j-rig/db";
+import { writeFileSync } from "node:fs";
+import { getRun, getRecentRuns, getRunResults, getRunArtifacts, getUnifiedReport } from "@j-rig/db";
+import { GradeSelectorSchema, renderUnifiedReportMarkdown, type UnifiedReport } from "@j-rig/core";
 import { openDb } from "../lib/db.js";
 import { icon, formatDuration, formatScore, header } from "../lib/output.js";
+
+export interface UnifiedReportOptions {
+  db: string;
+  graderId: string;
+  graderVersion: string;
+  graderSnapshotSha256: string;
+  json?: boolean;
+  output?: string;
+}
+
+export interface UnifiedReportResult {
+  report: UnifiedReport;
+  rendered: string;
+}
+
+/** Build a terminal/file projection over generic Runs and one Grade snapshot. */
+export function runUnifiedReport(options: UnifiedReportOptions): UnifiedReportResult {
+  const selector = GradeSelectorSchema.parse({
+    grader_id: options.graderId,
+    grader_version: options.graderVersion,
+    grader_snapshot_sha256: options.graderSnapshotSha256,
+  });
+  const database = openDb(options.db);
+  try {
+    const report = getUnifiedReport(database, selector, new Date().toISOString());
+    const rendered = options.json
+      ? `${JSON.stringify(report, null, 2)}\n`
+      : renderUnifiedReportMarkdown(report);
+    if (options.output) writeFileSync(options.output, rendered, "utf8");
+    return { report, rendered };
+  } finally {
+    database.close();
+  }
+}
 
 /**
  * Register the `report` command on the given Commander program.
@@ -19,6 +55,14 @@ export function registerReportCommand(program: Command): void {
     .option("--skill <name>", "Filter by skill name")
     .option("--run-id <id>", "Show detailed results for a specific run", parseInt)
     .option("--limit <n>", "Max runs to show", parseInt, 10)
+    .option("--unified", "Report generic raw Runs and one selected immutable Grader snapshot")
+    .option("--grader-id <id>", "Selected named Grader id (required with --unified)")
+    .option("--grader-version <version>", "Selected Grader version (required with --unified)")
+    .option(
+      "--grader-snapshot-sha256 <digest>",
+      "Selected Grader snapshot digest (required with --unified)",
+    )
+    .option("--output <path>", "Write unified JSON/Markdown to a file")
     .option("--json", "Output as JSON")
     .action(
       async (opts: {
@@ -26,9 +70,32 @@ export function registerReportCommand(program: Command): void {
         skill?: string;
         runId?: number;
         limit: number;
+        unified?: boolean;
+        graderId?: string;
+        graderVersion?: string;
+        graderSnapshotSha256?: string;
+        output?: string;
         json?: boolean;
       }) => {
         try {
+          if (opts.unified) {
+            if (!opts.graderId || !opts.graderVersion || !opts.graderSnapshotSha256) {
+              throw new Error(
+                "--unified requires --grader-id, --grader-version, and --grader-snapshot-sha256",
+              );
+            }
+            const result = runUnifiedReport({
+              db: opts.db,
+              graderId: opts.graderId,
+              graderVersion: opts.graderVersion,
+              graderSnapshotSha256: opts.graderSnapshotSha256,
+              json: opts.json,
+              output: opts.output,
+            });
+            if (!opts.output) process.stdout.write(result.rendered);
+            return;
+          }
+
           const database = openDb(opts.db);
 
           if (opts.runId) {

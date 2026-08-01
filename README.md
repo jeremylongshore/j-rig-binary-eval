@@ -265,6 +265,28 @@ pass rate, harness failures, ungraded completions, Wilson intervals, and score
 standard error without heterogeneous rollups. See
 [`033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`](000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md).
 
+### Unified report
+
+The new report projection selects one immutable Grader snapshot and preserves
+per-cell Task × Config × Model metrics plus raw Run lineage:
+
+```bash
+node packages/cli/dist/index.js report \
+  --unified \
+  --db ./j-rig.db \
+  --grader-id answer-checker \
+  --grader-version 1.0.0 \
+  --grader-snapshot-sha256 sha256:<64 lowercase hex> \
+  --json \
+  --output ./report.json
+```
+
+Omit `--json` for Markdown. Empty data is rendered explicitly; no global pass
+rate is inferred across heterogeneous cells. This is a local unsigned
+projection. The verified dashboard adapter and any Evidence Bundle/signing
+path remain downstream. See
+[`034-AT-SPEC-unified-report-json-markdown-2026-08-01.md`](000-docs/034-AT-SPEC-unified-report-json-markdown-2026-08-01.md).
+
 ### ⚠️ Stub providers — output is NOT ground truth
 
 When **no** real provider key is present, `j-rig eval` falls back to stub providers that emit synthetic outputs, and the CLI **refuses to run** unless you explicitly opt in by setting `J_RIG_ALLOW_STUB=1`. When stub mode is active, a loud banner is emitted to stderr on every invocation. Do not consume stub-mode output as evidence of skill quality; CI gates that ingest j-rig artifacts must refuse rows produced under stub mode.
