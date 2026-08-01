@@ -25,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Generic task/config runner and raw Run ledger:** `j-rig run` now executes a
+  named task/config/model/sample through a shell-free `ExecutableRunner`, stores
+  an idempotent `raw_runs` record before execution, retains runner failures and
+  timeouts distinctly from completed output, and records content-addressed raw
+  artifact references. Grading, regrade, balanced sampling, and reports remain
+  downstream evolution slices.
+
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add
   `skill-creator` after its hand-authored `eval-spec.yaml` landed
   ([#234](https://github.com/jeremylongshore/j-rig-skill-binary-eval/pull/234)).
