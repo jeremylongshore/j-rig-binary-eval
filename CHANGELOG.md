@@ -33,9 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   downstream evolution slices.
 
 - **Named Graders and immutable Grade snapshots:** `j-rig grade` evaluates a
-  completed raw Run with a versioned deterministic checker, stores the exact
-  definition and digest, and preserves prior judgments when `--regrade` adds a
-  new version. Runner errors and timeouts cannot be graded.
+  completed raw Run with a versioned deterministic or model-judge definition,
+  stores the exact definition and digest, and preserves prior judgments when
+  `--regrade` adds a new version. Model-judge sampling retains every vote,
+  latency, agreement fraction, raw verdict, reasoning, and disagreement flag;
+  `unsure` fails closed while remaining auditable. Runner errors and timeouts
+  cannot be graded.
 
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add
   `skill-creator` after its hand-authored `eval-spec.yaml` landed
