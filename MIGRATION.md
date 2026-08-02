@@ -4,6 +4,18 @@ Driven by ISEDC DR-018 (iaj-E02). All 5 workspace packages (`@j-rig/core`,
 `@j-rig/cli`, `@j-rig/db`, `@j-rig/dashboard`, and the root private workspace)
 bump to v2.0.0 simultaneously.
 
+## Real-provider outage handling
+
+New evaluations fail closed when a real provider cannot produce an execution or
+judge response. `j-rig eval --json` exits non-zero with an
+`evaluation_failed` diagnostic, marks the SQLite run `failed`, and does not
+emit a normal ground-truth scorecard or Evidence Bundle. Consumers must check
+the process exit code before ingesting stdout. HTTP 402 and explicit
+`Insufficient Balance`/quota responses are recorded as non-retryable
+`rate_limit` provider failures. Completed empty responses remain valid
+tool-dependent boundary observations. See
+[`000-docs/037-AT-SPEC-real-provider-failure-boundary-2026-08-02.md`](000-docs/037-AT-SPEC-real-provider-failure-boundary-2026-08-02.md).
+
 ## Breaking change: predicate body (the primary migration)
 
 The gate-result predicate body moves from j-rig's local v0.1.0-draft shape to

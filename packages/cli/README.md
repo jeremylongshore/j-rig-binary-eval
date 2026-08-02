@@ -129,6 +129,18 @@ The DeepSeek adapter is the shared OpenAI-Chat-Completions adapter pointed at th
 DeepSeek endpoint and the `deepseek-v4-flash` model — no DeepSeek-specific SDK is
 required.
 
+### Real-provider failure boundary
+
+Real provider failures are infrastructure evidence, not skill grades. If a
+functional or judge call fails, `j-rig eval` exits non-zero, marks the SQLite
+run `failed`, and emits an `evaluation_failed` object with credential-free
+`provider_failure` metadata under `--json`. It does not emit a normal
+`ground_truth: true` scorecard or Evidence Bundle. HTTP 402 and messages such as
+`Insufficient Balance` are classified as non-retryable quota failures. A
+completed response with empty text is still retained as a tool-dependent
+boundary observation. See
+[`000-docs/037-AT-SPEC-real-provider-failure-boundary-2026-08-02.md`](../../000-docs/037-AT-SPEC-real-provider-failure-boundary-2026-08-02.md).
+
 A built-in `stub` provider exists for pipeline plumbing only. It is gated behind
 `J_RIG_ALLOW_STUB=1` and its results are **not** ground truth.
 
