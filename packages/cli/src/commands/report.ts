@@ -2,7 +2,12 @@ import type { Command } from "commander";
 import chalk from "chalk";
 import { writeFileSync } from "node:fs";
 import { getRun, getRecentRuns, getRunResults, getRunArtifacts, getUnifiedReport } from "@j-rig/db";
-import { GradeSelectorSchema, renderUnifiedReportMarkdown, type UnifiedReport } from "@j-rig/core";
+import {
+  GradeSelectorSchema,
+  renderUnifiedReportHtml,
+  renderUnifiedReportMarkdown,
+  type UnifiedReport,
+} from "@j-rig/core";
 import { openDb } from "../lib/db.js";
 import { icon, formatDuration, formatScore, header } from "../lib/output.js";
 
@@ -13,6 +18,7 @@ export interface UnifiedReportOptions {
   graderSnapshotSha256: string;
   runIds?: readonly string[];
   json?: boolean;
+  html?: boolean;
   output?: string;
 }
 
@@ -31,9 +37,11 @@ export function runUnifiedReport(options: UnifiedReportOptions): UnifiedReportRe
   const database = openDb(options.db);
   try {
     const report = getUnifiedReport(database, selector, new Date().toISOString(), options.runIds);
-    const rendered = options.json
-      ? `${JSON.stringify(report, null, 2)}\n`
-      : renderUnifiedReportMarkdown(report);
+    const rendered = options.html
+      ? renderUnifiedReportHtml(report)
+      : options.json
+        ? `${JSON.stringify(report, null, 2)}\n`
+        : renderUnifiedReportMarkdown(report);
     if (options.output) writeFileSync(options.output, rendered, "utf8");
     return { report, rendered };
   } finally {
@@ -63,7 +71,8 @@ export function registerReportCommand(program: Command): void {
       "--grader-snapshot-sha256 <digest>",
       "Selected Grader snapshot digest (required with --unified)",
     )
-    .option("--output <path>", "Write unified JSON/Markdown to a file")
+    .option("--output <path>", "Write the selected unified projection to a file")
+    .option("--html", "Output a self-contained HTML report (with --unified)")
     .option("--json", "Output as JSON")
     .action(
       async (opts: {
@@ -76,14 +85,21 @@ export function registerReportCommand(program: Command): void {
         graderVersion?: string;
         graderSnapshotSha256?: string;
         output?: string;
+        html?: boolean;
         json?: boolean;
       }) => {
         try {
+          if (opts.html && !opts.unified) {
+            throw new Error("--html requires --unified");
+          }
           if (opts.unified) {
             if (!opts.graderId || !opts.graderVersion || !opts.graderSnapshotSha256) {
               throw new Error(
                 "--unified requires --grader-id, --grader-version, and --grader-snapshot-sha256",
               );
+            }
+            if (opts.html && opts.json) {
+              throw new Error("--html and --json are mutually exclusive");
             }
             const result = runUnifiedReport({
               db: opts.db,
@@ -91,6 +107,7 @@ export function registerReportCommand(program: Command): void {
               graderVersion: opts.graderVersion,
               graderSnapshotSha256: opts.graderSnapshotSha256,
               json: opts.json,
+              html: opts.html,
               output: opts.output,
             });
             if (!opts.output) process.stdout.write(result.rendered);
