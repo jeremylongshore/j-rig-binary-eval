@@ -2,7 +2,7 @@
 
 > Release-quality evaluation harness and rollout gate for Claude Skills
 
-**Last Updated:** 2026-08-01
+**Last Updated:** 2026-08-02
 
 ## By Category
 
@@ -32,6 +32,7 @@
 | 032 | [032-AT-SPEC-named-graders-snapshots-regrade-2026-08-01.md](032-AT-SPEC-named-graders-snapshots-regrade-2026-08-01.md)   | Named Graders, immutable Grade snapshots, deterministic checks, and regrade policy       |
 | 033 | [033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md](033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md)       | Balanced execution sampling, target-N planning, and uncertainty metrics                  |
 | 034 | [034-AT-SPEC-unified-report-json-markdown-2026-08-01.md](034-AT-SPEC-unified-report-json-markdown-2026-08-01.md)       | Unified selected-Grader JSON/Markdown report and publication boundary                     |
+| 035 | [035-AT-SPEC-skill-promotion-evidence-2026-08-02.md](035-AT-SPEC-skill-promotion-evidence-2026-08-02.md)                   | Skill Evidence Bundle identity, threshold, and regression promotion contract              |
 
 ### OD — Operations & Deployment
 
@@ -112,6 +113,7 @@
 | 032 | AT-SPEC  | [named-graders-snapshots-regrade.md](032-AT-SPEC-named-graders-snapshots-regrade-2026-08-01.md)                      |
 | 033 | AT-SPEC  | [balanced-sampling-uncertainty.md](033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md)                          |
 | 034 | AT-SPEC  | [unified-report-json-markdown.md](034-AT-SPEC-unified-report-json-markdown-2026-08-01.md)                          |
+| 035 | AT-SPEC  | [skill-promotion-evidence.md](035-AT-SPEC-skill-promotion-evidence-2026-08-02.md)                                  |
 
 ## Epics
 
@@ -155,7 +157,7 @@ Local, self-contained library of templates, reference standards, agent patterns,
 
 ## Summary
 
-- **Total documents:** 34 numbered docs (`001`–`034`, with two `010`s) + 10 epics + templates & references library
+- **Total documents:** 35 numbered docs (`001`–`035`, with two `010`s) + 10 epics + templates & references library
 - **Categories used:** 6 — PP, AT, OD, TQ, AA, DR
-- **Next sequence number:** 035
+- **Next sequence number:** 036
 - **Note:** every per-doc file in this directory is the canonical source; this index is the navigation layer. Rebuild via `/doc-filing` (or `/validate-consistency`, which flags index drift) when docs are added.
