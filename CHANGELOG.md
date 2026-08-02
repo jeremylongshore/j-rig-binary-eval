@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now named `SkillEvalSpec` throughout the runtime/CLI surface, while the
   canonical kernel contract remains `EvalSpec`. All active package pins,
   evidence tooling, and the refiner consumed-kernel constant move to
-  `@intentsolutions/core@0.10.0`; the profile-to-kernel adapter remains the
-  next substrate step.
+  `@intentsolutions/core@0.10.0`. The explicit `adaptSkillEvalSpec` boundary
+  now emits a strict kernel `EvalSpec` plus a separate lineage envelope for
+  source-profile hashes, mapping revisions, blocker policy, and coverage.
 
 ### Added
 
