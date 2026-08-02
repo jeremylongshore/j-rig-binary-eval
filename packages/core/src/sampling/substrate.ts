@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { GradeVerdict } from "../grading/substrate.js";
+import type { GradeMetadata, GradeVerdict, JudgeGradeMetadata } from "../grading/substrate.js";
 import { EvalIdentifierSchema } from "../execution/substrate.js";
 
 /** One homogeneous Task × Config × Model execution population. */
@@ -179,6 +179,7 @@ export interface SamplingGrade {
   grader_snapshot_sha256: string;
   verdict: GradeVerdict;
   score: number;
+  metadata?: GradeMetadata;
 }
 
 export interface GradeObservation extends SampleObservation {
@@ -209,6 +210,11 @@ export interface GradeMeasurement extends SamplingCell {
   confidence_interval_95: WilsonInterval | null;
   mean_score: number | null;
   score_standard_error: number | null;
+  judge_sampled_runs: number;
+  judge_vote_count: number;
+  judge_disagreement_count: number;
+  judge_disagreement_rate: number | null;
+  judge_agreement_mean: number | null;
 }
 
 /** Wilson score interval for a binary pass rate at the fixed 95% level. */
@@ -282,6 +288,11 @@ export function summarizeGradeObservations(
     const scores = graded
       .map((row) => row.grade?.score)
       .filter((score): score is number => score !== undefined);
+    const judgeMetadata = graded
+      .map((row) => row.grade?.metadata?.judge)
+      .filter((judge): judge is JudgeGradeMetadata => judge !== undefined);
+    const judge_vote_count = judgeMetadata.reduce((sum, judge) => sum + judge.samples, 0);
+    const judge_disagreement_count = judgeMetadata.filter((judge) => judge.disagreement).length;
     const pass_rate = graded.length === 0 ? null : pass_count / graded.length;
     return {
       task_id: first.task_id,
@@ -310,6 +321,15 @@ export function summarizeGradeObservations(
       mean_score:
         scores.length === 0 ? null : scores.reduce((sum, score) => sum + score, 0) / scores.length,
       score_standard_error: standardError(scores),
+      judge_sampled_runs: judgeMetadata.length,
+      judge_vote_count,
+      judge_disagreement_count,
+      judge_disagreement_rate:
+        judgeMetadata.length === 0 ? null : judge_disagreement_count / judgeMetadata.length,
+      judge_agreement_mean:
+        judgeMetadata.length === 0
+          ? null
+          : judgeMetadata.reduce((sum, judge) => sum + judge.agreement, 0) / judgeMetadata.length,
     };
   });
 }

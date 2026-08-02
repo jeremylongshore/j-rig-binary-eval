@@ -76,6 +76,18 @@ balanced passes, and resumes from the immutable raw-run ledger. Both surfaces
 retain runner failures instead of converting them into model grades. See
 `000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`.
 
+To report one exact Grader snapshot over a sampling manifest, provide all three
+identity fields:
+
+```bash
+j-rig report \
+  --sampling-manifest ./sampling-manifest.yaml \
+  --grader-id quality-judge \
+  --grader-version "1" \
+  --grader-snapshot-sha256 sha256:<64-hex> \
+  --json
+```
+
 ## Providers
 
 The evaluator's judge layer talks to an LLM provider. The provider is
