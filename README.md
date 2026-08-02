@@ -265,6 +265,17 @@ pass rate, harness failures, ungraded completions, Wilson intervals, and score
 standard error without heterogeneous rollups. See
 [`033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`](000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md).
 
+`j-rig batch` consumes a path-based suite manifest, executes these jobs in
+balanced passes, and resumes from the immutable raw-run ledger. Runner
+failures remain diagnostic observations rather than model grades:
+
+```bash
+node packages/cli/dist/index.js batch \
+  --manifest ./batch.yaml \
+  --db ./j-rig.db \
+  --json
+```
+
 ### Unified report
 
 The new report projection selects one immutable Grader snapshot and preserves

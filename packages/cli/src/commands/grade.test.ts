@@ -19,6 +19,7 @@ function fixture() {
   const configPath = join(dir, "config.yaml");
   const graderV1Path = join(dir, "grader-v1.yaml");
   const graderV2Path = join(dir, "grader-v2.yaml");
+  const modelGraderPath = join(dir, "grader-model.yaml");
   const db = join(dir, "runs.db");
 
   writeFileSync(
@@ -58,7 +59,19 @@ function fixture() {
       ],
     }),
   );
-  return { taskPath, configPath, graderV1Path, graderV2Path, db };
+  writeFileSync(
+    modelGraderPath,
+    stringify({
+      id: "quality-judge",
+      version: "1.0.0",
+      kind: "model_judge",
+      model: "fixture-judge",
+      criterion_description: "The output is correct",
+      judge_prompt: "Answer yes only when the output is correct.",
+      samples: 3,
+    }),
+  );
+  return { taskPath, configPath, graderV1Path, graderV2Path, modelGraderPath, db };
 }
 
 describe("j-rig grade", () => {
@@ -66,25 +79,25 @@ describe("j-rig grade", () => {
     const paths = fixture();
     const raw = await runGenericEval({ ...paths, sampleIndex: 0 });
 
-    const first = runGrade({
+    const first = await runGrade({
       runId: raw.run.id,
       graderPath: paths.graderV1Path,
       db: paths.db,
       regrade: false,
     });
-    const repeat = runGrade({
+    const repeat = await runGrade({
       runId: raw.run.id,
       graderPath: paths.graderV1Path,
       db: paths.db,
       regrade: false,
     });
-    const second = runGrade({
+    const second = await runGrade({
       runId: raw.run.id,
       graderPath: paths.graderV2Path,
       db: paths.db,
       regrade: true,
     });
-    const repeatV1 = runGrade({
+    const repeatV1 = await runGrade({
       runId: raw.run.id,
       graderPath: paths.graderV1Path,
       db: paths.db,
@@ -102,20 +115,54 @@ describe("j-rig grade", () => {
   it("requires --regrade before changing a grader version", async () => {
     const paths = fixture();
     const raw = await runGenericEval({ ...paths, sampleIndex: 0 });
-    runGrade({
+    await runGrade({
       runId: raw.run.id,
       graderPath: paths.graderV1Path,
       db: paths.db,
       regrade: false,
     });
 
-    expect(() =>
+    await expect(
       runGrade({
         runId: raw.run.id,
         graderPath: paths.graderV2Path,
         db: paths.db,
         regrade: false,
       }),
-    ).toThrow("pass --regrade");
+    ).rejects.toThrow("pass --regrade");
+  });
+
+  it("runs a sampled model-judge grader and persists disagreement evidence", async () => {
+    const paths = fixture();
+    const raw = await runGenericEval({ ...paths, sampleIndex: 0 });
+    const votes: Array<"yes" | "no" | "unsure"> = ["yes", "no", "yes"];
+
+    const result = await runGrade({
+      runId: raw.run.id,
+      graderPath: paths.modelGraderPath,
+      db: paths.db,
+      regrade: false,
+      judge: {
+        async judge() {
+          return {
+            verdict: votes.shift() ?? "unsure",
+            confidence: 0.5,
+            reasoning: "fixture vote",
+          };
+        },
+      },
+    });
+
+    expect(result.created).toBe(true);
+    expect(result.grade.grader_kind).toBe("model_judge");
+    expect(JSON.parse(result.grade.metadata_json ?? "{}")).toMatchObject({
+      judge: {
+        raw_verdict: "yes",
+        samples: 3,
+        agreement: 2 / 3,
+        sample_verdicts: ["yes", "no", "yes"],
+        disagreement: true,
+      },
+    });
   });
 });

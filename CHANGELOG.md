@@ -29,13 +29,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   named task/config/model/sample through a shell-free `ExecutableRunner`, stores
   an idempotent `raw_runs` record before execution, retains runner failures and
   timeouts distinctly from completed output, and records content-addressed raw
-  artifact references. Balanced sampling, suites, and reports remain
-  downstream evolution slices.
+  artifact references. Balanced sampling and batch execution build on this
+  ledger without collapsing runner failures into model failures.
 
 - **Named Graders and immutable Grade snapshots:** `j-rig grade` evaluates a
-  completed raw Run with a versioned deterministic checker, stores the exact
-  definition and digest, and preserves prior judgments when `--regrade` adds a
-  new version. Runner errors and timeouts cannot be graded.
+  completed raw Run with a versioned deterministic or model-judge definition,
+  stores the exact definition and digest, and preserves prior judgments when
+  `--regrade` adds a new version. Model-judge sampling retains every vote,
+  latency, agreement fraction, raw verdict, reasoning, and disagreement flag;
+  `unsure` fails closed while remaining auditable. Runner errors and timeouts
+  cannot be graded.
+
+- **Balanced execution sampling and uncertainty:** `j-rig sample-plan` creates
+  round-robin target-N top-ups across explicit Task × Config × Model cells;
+  completed Runs count, active Runs reserve slots, and harness failures are
+  replaced without being misreported as model failures. `j-rig batch` executes
+  path-based suite jobs in those balanced passes and resumes from the raw-run
+  ledger. `j-rig report --sampling-manifest` selects one immutable Grade
+  snapshot and exposes pass rate, Wilson intervals, harness failures, ungraded
+  completions, score standard error, judge vote counts, and disagreement rates
+  without heterogeneous rollups.
 
 - **Balanced execution sampling and uncertainty:** `j-rig sample-plan` creates
   round-robin target-N top-ups across explicit Task × Config × Model cells;
