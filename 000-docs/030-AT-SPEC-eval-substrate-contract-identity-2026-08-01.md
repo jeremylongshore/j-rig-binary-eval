@@ -3,7 +3,7 @@
 **Status:** IMPLEMENTATION APPLICATION OF `IEP-EVAL-EVOLUTION-001`
 **Date:** 2026-08-01
 **Master bead:** `bd_000-projects-htjt`
-**Repo workstream:** `bd_000-projects-htjt.2`
+**Repo bead:** `bd_000-projects-htjt.2`
 
 ## Boundary
 
