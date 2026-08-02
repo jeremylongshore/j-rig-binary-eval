@@ -39,6 +39,7 @@ j-rig check <skill-dir>              # deterministic package-integrity checks
 j-rig validate <eval-spec.yaml>      # validate an eval spec / contract YAML
 j-rig eval <skill-dir> --spec ...    # binary evaluation (5 of 7 layers by default; regression + baseline are opt-in)
 j-rig eval-batch <skills-root>        # scaffold missing baselines and evaluate a skills root
+j-rig suite <suite.yaml>              # balanced, resumable Task × Config target-N suite
 j-rig run --task ... --config ...     # generic shell-free task/config raw Run
 j-rig grade --run-id ... --grader ... # deterministic named Grade over a completed Run
 j-rig sample-plan --manifest ...      # balanced target-N top-up plan
@@ -79,8 +80,9 @@ not gradeable. See
 
 `j-rig sample-plan` reads a YAML manifest of explicit Task × Config × Model
 cells and reports the next balanced sample indices needed to reach `--target-n`.
-It does not execute the harness; the suite/batch workflow will consume these
-jobs. See `000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`.
+It does not execute the harness; `j-rig suite` consumes these same jobs while
+retaining an auditable manifest. See
+`000-docs/033-AT-SPEC-balanced-sampling-uncertainty-2026-08-01.md`.
 
 `j-rig report --unified` requires `--grader-id`, `--grader-version`, and the
 full `--grader-snapshot-sha256`. It emits `j-rig/unified-report/v1` JSON with
@@ -88,6 +90,19 @@ full `--grader-snapshot-sha256`. It emits `j-rig/unified-report/v1` JSON with
 projection to a file. This is unsigned local output, not a dashboard ingest or
 rollout decision. See
 `000-docs/034-AT-SPEC-unified-report-json-markdown-2026-08-01.md`.
+
+`j-rig suite <suite.yaml>` is the one-command generic lifecycle. The manifest
+lists Task YAML files, Config YAML files, one named Grader, and `target_n`.
+Task/config paths resolve relative to the suite manifest, the Cartesian matrix
+is planned deterministically, and every raw Run is idempotent by its complete
+Task × Config × Model × sample identity. The command writes
+`.j-rig/suites/<suite-id>/manifest.json`, `report.json`, and `report.md`;
+rerunning the same command resumes planned/running jobs and adds only the
+fresh sample indices needed after harness failures. Existing `run`, `grade`,
+`sample-plan`, `report`, `eval`, and `eval-batch` commands remain valid
+compatibility seams. See
+`000-docs/036-AT-SPEC-eval-suite-lifecycle-2026-08-01.md` for the manifest
+schema, validation diagnostics, and migration path.
 
 ## Providers
 

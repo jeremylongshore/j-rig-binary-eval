@@ -46,11 +46,11 @@ function loadYaml<T>(path: string, schema: z.ZodType<T>): T {
   return parsed.data;
 }
 
-function loadTask(path: string): EvalTask {
+export function loadTaskDefinition(path: string): EvalTask {
   return loadYaml(resolve(path), EvalTaskSchema);
 }
 
-function loadConfig(path: string): EvalConfig {
+export function loadConfigDefinition(path: string): EvalConfig {
   const absolutePath = resolve(path);
   const parsed = loadYaml(absolutePath, EvalConfigSchema);
   return {
@@ -81,8 +81,8 @@ export async function runGenericEval(options: GenericRunOptions): Promise<Generi
     throw new Error(`sampleIndex must be a non-negative integer (got ${options.sampleIndex})`);
   }
 
-  const task = loadTask(options.taskPath);
-  const config = loadConfig(options.configPath);
+  const task = loadTaskDefinition(options.taskPath);
+  const config = loadConfigDefinition(options.configPath);
   const requestWithoutId: Omit<RunnerRequest, "run_id"> = {
     task,
     config,
