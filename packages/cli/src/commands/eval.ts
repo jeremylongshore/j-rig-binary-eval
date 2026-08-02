@@ -46,6 +46,7 @@ import type {
   Criterion,
   Regression,
   BaselineComparison,
+  ProviderFailure,
 } from "@j-rig/core";
 import {
   getOrCreateSkillVersion,
@@ -134,6 +135,59 @@ interface ProviderExtras {
   meter?: EvalCostMeter;
   judgeProvider?: string;
   judgeModel?: string;
+}
+
+interface EvalProviderFailureDetails {
+  phase: "execution" | "judge";
+  model: string;
+  provider: string;
+  category: ProviderFailure["category"];
+  retryable: boolean;
+  message: string;
+}
+
+/** A real-provider failure is infrastructure evidence, never a skill grade. */
+class EvalProviderFailure extends Error {
+  readonly details: EvalProviderFailureDetails;
+
+  constructor(details: EvalProviderFailureDetails) {
+    super(
+      `real provider failure during ${details.phase}: ${details.provider}/${details.model} ` +
+        `${details.category} — ${details.message}`,
+    );
+    this.name = "EvalProviderFailure";
+    this.details = details;
+  }
+}
+
+/** Keep provider diagnostics useful without allowing credentials into output or DB. */
+function redactDiagnostic(raw: string): string {
+  let safe = raw;
+  for (const secret of Object.values(process.env)) {
+    if (secret && secret.length >= 12) safe = safe.split(secret).join("[REDACTED]");
+  }
+  return safe
+    .replace(/Bearer\s+\S+/gi, "Bearer [REDACTED]")
+    .replace(/((?:api[_-]?key|token|secret|password)\s*[=:]\s*)\S+/gi, "$1[REDACTED]");
+}
+
+function providerFailureDetails(
+  phase: EvalProviderFailureDetails["phase"],
+  model: string,
+  fallbackProvider: string,
+  outcome: ObservedOutcome,
+): EvalProviderFailureDetails {
+  const failure = outcome.provider_failure;
+  return {
+    phase,
+    model,
+    provider: failure?.providerName ?? fallbackProvider,
+    category: failure?.category ?? (outcome.status === "timed_out" ? "network_timeout" : "unknown"),
+    retryable: failure?.retryable ?? outcome.status === "timed_out",
+    message: redactDiagnostic(
+      outcome.output.error ?? `execution ended with status ${outcome.status}`,
+    ),
+  };
 }
 
 /**
@@ -687,6 +741,19 @@ export function registerEvalCommand(program: Command): void {
           // enum on runtime.run.finished.
           let runHadFailure = false;
 
+          const failProviderRun = (details: EvalProviderFailureDetails): never => {
+            const safeDetails = {
+              type: "provider_failure",
+              ...details,
+            };
+            transitionRun(database, runId, "failed", JSON.stringify(safeDetails));
+            emitRuntimeRunFinished(correlation, {
+              terminalState: RuntimeTerminalState.ARCHIVED_FAILED,
+              durationMs: Date.now() - modelStart,
+            });
+            throw new EvalProviderFailure(details);
+          };
+
           if (!opts.json) {
             console.log(header(`--- Model: ${model} ---`));
             console.log(
@@ -791,6 +858,23 @@ export function registerEvalCommand(program: Command): void {
               );
             }
 
+            // A real-provider execution failure is infrastructure evidence,
+            // not an empty skill response. The old path fed these outcomes to
+            // the judge, which turned an account outage into an exit-0
+            // `ground_truth: true` warning. Preserve legitimate completed+empty
+            // stops for tool-dependent boundary analysis, but fail closed on
+            // any failed/timed-out/error outcome from a real backend.
+            if (providers.real) {
+              const failedOutcome = outcomes.find(
+                (o) => o.status !== "completed" || Boolean(o.output.error),
+              );
+              if (failedOutcome) {
+                failProviderRun(
+                  providerFailureDetails("execution", model, providers.providerName, failedOutcome),
+                );
+              }
+            }
+
             // Judge each outcome against the criteria that test case actually
             // exercises and flatten results. A test case may scope itself via
             // `criteria_ids` (schema default: ALL); honoring it stops an
@@ -829,6 +913,28 @@ export function registerEvalCommand(program: Command): void {
                 judgeTimeoutMs: spec.judge_timeout_ms,
                 sampleConcurrency: spec.judge_sample_concurrency,
               });
+
+              // Judge errors are also provider failures. In particular, do
+              // not let the judgment engine's honest `unsure` fallback turn a
+              // depleted account or transport outage into a normal grade.
+              if (providers.real) {
+                const failedJudgment = judgments.find(
+                  (j) => j.provider_failure || j.reasoning.startsWith("Judge error:"),
+                );
+                if (failedJudgment) {
+                  const failure = failedJudgment.provider_failure;
+                  failProviderRun({
+                    phase: "judge",
+                    model,
+                    provider: failure?.providerName ?? providers.judgeProviderName,
+                    category: failure?.category ?? "unknown",
+                    retryable: failure?.retryable ?? false,
+                    message: redactDiagnostic(
+                      `criterion ${failedJudgment.criterion_id}: ${failedJudgment.reasoning}`,
+                    ),
+                  });
+                }
+              }
 
               // OTel per-criterion events (067 §§ 1.1, 1.2). For judge-method
               // criteria we emit judge.invoked + judge.verdict; for every
@@ -1331,7 +1437,19 @@ export function registerEvalCommand(program: Command): void {
           console.log(chalk.dim(`Duration: ${formatDuration(duration)} | DB: ${opts.db}`));
         }
       } catch (err) {
-        console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
+        const message = redactDiagnostic(err instanceof Error ? err.message : String(err));
+        if (opts.json) {
+          const payload: Record<string, unknown> = {
+            error: "evaluation_failed",
+            message,
+          };
+          if (err instanceof EvalProviderFailure) {
+            payload.provider_failure = err.details;
+          }
+          console.log(JSON.stringify(payload));
+        } else {
+          console.error(`Error: ${message}`);
+        }
         process.exit(1);
       }
     });

@@ -2,6 +2,7 @@ import type { TestCase } from "../schemas/test-case.js";
 import type { ParsedSkill } from "../parsers/skill-parser.js";
 import type { SkillFrontmatter } from "../schemas/skill-frontmatter.js";
 import type { ExecutionContext, ExecutionProvider, ObservedOutcome } from "./types.js";
+import { providerFailureFromError } from "../providers/errors.js";
 
 /**
  * Run functional execution tests for a skill against test cases.
@@ -58,6 +59,7 @@ export async function runFunctionalTests(
       });
     } catch (err) {
       const now = new Date().toISOString();
+      const providerFailure = providerFailureFromError(err);
       outcomes.push({
         test_case_id: tc.id,
         prompt: tc.prompt,
@@ -74,6 +76,7 @@ export async function runFunctionalTests(
           timed_out: false,
         },
         status: "failed",
+        ...(providerFailure ? { provider_failure: providerFailure } : {}),
       });
     }
   }
