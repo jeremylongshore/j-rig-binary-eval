@@ -111,6 +111,13 @@ not treat it as a gate-result Evidence Bundle or publish it directly; the
 dashboard must re-verify through its own ingest boundary. See
 `000-docs/034-AT-SPEC-unified-report-json-markdown-2026-08-01.md`.
 
+The legacy `j-rig eval --emit-bundle` path emits additive
+`j-rig/skill-promotion/v1` metadata on each real-skill gate row. It binds the
+OTel EvalRun UUID, SQLite run, skill/spec snapshots, effective binary-criteria
+Grader snapshot, thresholds, and regression comparison. A skipped regression
+layer is advisory for promotion, even if the legacy `LaunchReport` decision is
+`ship`; see `000-docs/035-AT-SPEC-skill-promotion-evidence-2026-08-02.md`.
+
 ## Non-Negotiable Design Principles
 
 1. **Criteria must be binary** — yes or no, no gradients or fuzzy scores
