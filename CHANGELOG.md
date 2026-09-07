@@ -24,6 +24,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A dead judge provider now signs `error`, never `advisory`** (`packages/cli/src/commands/eval.ts`,
+  `packages/core/src/judgment/{engine,types}.ts`). Found by the 2026-09 conference audit's
+  "make it lie" battery: with a garbage `MINIMAX_API_KEY`, every judge call returned HTTP 401,
+  the errored-sample semantics turned each criterion into an `unsure` vote, the rollout decision
+  degraded to `warn`, and `--emit-bundle` wrote a kernel-valid `gate-result/v1` row with
+  `gate_decision: "advisory"` and the reason "16 criteria could not be judged (unsure)" — with
+  exit 0, no `errored` count in the predicate, and a shape the rollout gate allows by default
+  (`advisory_blocks=false`). Nothing had been evaluated. `judgeError` now sets an additive
+  `judge_error` field (the provider message) on the judgment; when EVERY judged criterion carries
+  it, the CLI maps the row to the kernel's `error` verdict, puts
+  `judge provider failed on every judged criterion (N/N); nothing was evaluated: <message>` first
+  in `gate_reasons` (the kernel's rule for `error`), marks the run failed, and prints the same
+  line. A partial outage (some samples succeed) is unchanged: it stays a real, weakened judgment.
+  Offline regression: `J_RIG_STUB_JUDGE_FAIL=1` makes the stub judge throw (test-only; see
+  STUB-PROVIDERS.md); the e2e suite proves the dead-judge row signs `error` and a healthy stub
+  still signs `pass`.
+
 - **Vale lane no longer permanently red**
   ([#231](https://github.com/jeremylongshore/j-rig-skill-binary-eval/pull/231)).
 

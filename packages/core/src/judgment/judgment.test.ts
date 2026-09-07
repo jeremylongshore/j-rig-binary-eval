@@ -275,6 +275,35 @@ describe("judgeCriteria — N-sample majority voting", () => {
     expect(r!.sample_verdicts).toEqual(["no", "unsure", "unsure", "unsure", "unsure"]);
   });
 
+  it("marks a judgment whose provider failed on every sample with judge_error (dead-judge flag)", async () => {
+    const dead: JudgeProvider = {
+      judge: async () => {
+        throw new Error("HTTP 401 authentication");
+      },
+    };
+    const criteria = [{ id: "c1", description: "d", method: "judge" as const, blocker: true }];
+    const single = await judgeCriteria(criteria, makeOutcome("x"), dead);
+    expect(single[0]!.verdict).toBe("unsure");
+    expect(single[0]!.judge_error).toContain("401");
+    const multi = await judgeCriteria(criteria, makeOutcome("x"), dead, { samples: 3 });
+    expect(multi[0]!.verdict).toBe("unsure");
+    expect(multi[0]!.judge_error).toContain("401");
+  });
+
+  it("does NOT set judge_error when at least one sample succeeded (partial outage is still a judgment)", async () => {
+    let n = 0;
+    const flaky: JudgeProvider = {
+      judge: async () => {
+        if (n++ === 0) return { verdict: "no", confidence: 0.9, reasoning: "ok" };
+        throw new Error("HTTP 503");
+      },
+    };
+    const criteria = [{ id: "c1", description: "d", method: "judge" as const, blocker: true }];
+    const r = await judgeCriteria(criteria, makeOutcome("x"), flaky, { samples: 3 });
+    expect(r[0]!.judge_error).toBeUndefined();
+    expect(r[0]!.reasoning).toContain("errored");
+  });
+
   it("degrades to the legacy error result when every sample fails", async () => {
     const provider = sequenceJudge([new Error("down"), new Error("down"), new Error("down")]);
     const [r] = await judgeCriteria([judgeCrit()], makeOutcome("t"), provider, { samples: 3 });

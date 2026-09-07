@@ -273,5 +273,6 @@ function judgeError(criterionId: string, model: string | undefined, err: unknown
     reasoning: `Judge error: ${err instanceof Error ? err.message : String(err)}`,
     method: "judge",
     judge_model: model,
+    judge_error: err instanceof Error ? err.message : String(err),
   };
 }
