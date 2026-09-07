@@ -57,6 +57,10 @@ the dead-judge path — every judged criterion errored → the emitted row is `e
 `advisory` — has an offline regression test (`eval.e2e.test.ts`). It has no effect on real
 providers and must never be set outside a test.
 
+Exit contract when the switch trips: the CLI still writes `--emit-bundle` (signed `error`) and
+the `--json` result, then exits **2** (dead judge = non-evaluation). A healthy stub exits 0.
+The provider's message is redacted (`redactProviderError`) before it enters the signed reason.
+
 ### 2. Loud banner on every stub invocation
 
 When stub mode is active, the first stub-class constructor in a process emits a multi-line warning banner to **stderr** (never stdout — preserves `--json` stream cleanliness). The banner declares:

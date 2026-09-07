@@ -285,6 +285,17 @@ describe("judgeCriteria — N-sample majority voting", () => {
     const single = await judgeCriteria(criteria, makeOutcome("x"), dead);
     expect(single[0]!.verdict).toBe("unsure");
     expect(single[0]!.judge_error).toContain("401");
+    // Credential boundary: a provider that echoes the failing request must not
+    // leak the key into the (soon signed) judge_error / reasoning.
+    const leaky: JudgeProvider = {
+      judge: async () => {
+        throw new Error("HTTP 401 Authorization: Bearer sk-ant-api03-LEAKEDKEYVALUE0123456789");
+      },
+    };
+    const [l] = await judgeCriteria(criteria, makeOutcome("x"), leaky);
+    expect(l!.judge_error).toContain("401");
+    expect(l!.judge_error).not.toContain("LEAKEDKEYVALUE");
+    expect(l!.reasoning).not.toContain("LEAKEDKEYVALUE");
     const multi = await judgeCriteria(criteria, makeOutcome("x"), dead, { samples: 3 });
     expect(multi[0]!.verdict).toBe("unsure");
     expect(multi[0]!.judge_error).toContain("401");

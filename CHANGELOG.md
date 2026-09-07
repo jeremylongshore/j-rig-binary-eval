@@ -39,7 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   line. A partial outage (some samples succeed) is unchanged: it stays a real, weakened judgment.
   Offline regression: `J_RIG_STUB_JUDGE_FAIL=1` makes the stub judge throw (test-only; see
   STUB-PROVIDERS.md); the e2e suite proves the dead-judge row signs `error` and a healthy stub
-  still signs `pass`.
+  still signs `pass`. Review follow-ups (Greptile, PR #295): (1) the provider message is now
+  passed through `redactProviderError` (`packages/core/src/judgment/redact.ts`: Authorization /
+  Bearer headers, `key=`/`token=` values, known key prefixes, JWTs, any 32+ char opaque run;
+  240-char cap) before it reaches `reasoning`, `judge_error`, or the signed `gate_reasons` —
+  the credential boundary of `000-docs/021`; (2) exit contract: a dead judge now exits **2**
+  after the bundle and JSON are flushed (0 = evaluated, verdict lives in the bundle; 1 = crash),
+  so a CI step that trusts the exit status cannot treat a non-evaluation as success. Both
+  e2e tests assert the status.
 
 - **Vale lane no longer permanently red**
   ([#231](https://github.com/jeremylongshore/j-rig-skill-binary-eval/pull/231)).

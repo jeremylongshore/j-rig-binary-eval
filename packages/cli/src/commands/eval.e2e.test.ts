@@ -77,6 +77,9 @@ describe("j-rig eval — end-to-end self-eval (the tool evaluates a skill)", () 
         },
       );
       expect(existsSync(bundlePath), `no bundle emitted:\n${r.stderr}`).toBe(true);
+      // Exit contract: a dead judge is a non-evaluation -> exit 2 (bundle still
+      // written). A CI step trusting the status must not see 0 here.
+      expect(r.status, `dead-judge run must exit 2:\n${r.stderr}`).toBe(2);
       const bundle = JSON.parse(readFileSync(bundlePath, "utf-8")) as GateRow[];
       expect(bundle.length).toBeGreaterThanOrEqual(1);
       for (const row of bundle) {
@@ -85,6 +88,8 @@ describe("j-rig eval — end-to-end self-eval (the tool evaluates a skill)", () 
         const reasons = (row.predicate as { gate_reasons?: string[] }).gate_reasons ?? [];
         expect(reasons[0]).toMatch(/judge provider failed on every judged criterion/);
         expect(reasons[0]).toMatch(/401/);
+        // Credential boundary: the signed reason carries a status, never a key.
+        expect(reasons[0]).not.toMatch(/sk-|Bearer\s+\S{8,}|api[_-]?key=/i);
       }
     } finally {
       rmSync(work, { recursive: true, force: true });
@@ -95,7 +100,7 @@ describe("j-rig eval — end-to-end self-eval (the tool evaluates a skill)", () 
     const work = mkdtempSync(join(tmpdir(), "jrig-eval-live-judge-"));
     const bundlePath = join(work, "bundle.json");
     try {
-      spawnSync(
+      const r = spawnSync(
         "node",
         [
           CLI_PATH,
@@ -117,6 +122,7 @@ describe("j-rig eval — end-to-end self-eval (the tool evaluates a skill)", () 
       );
       const bundle = JSON.parse(readFileSync(bundlePath, "utf-8")) as GateRow[];
       expect(bundle[0]!.predicate.gate_decision).not.toBe("error");
+      expect(r.status, `healthy stub run must exit 0:\n${r.stderr}`).toBe(0);
     } finally {
       rmSync(work, { recursive: true, force: true });
     }

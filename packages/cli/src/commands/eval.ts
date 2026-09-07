@@ -639,6 +639,10 @@ export function registerEvalCommand(program: Command): void {
           }
         }
 
+        // Set when the dead-judge override fires for ANY model: the run
+        // evaluated nothing, so the process must not exit 0 (a CI step that
+        // trusts the exit status would otherwise pass a non-evaluation).
+        let deadJudgeSeen = false;
         for (const model of models) {
           const modelStart = Date.now();
           const svId = getOrCreateSkillVersion(database, skillName, skillVersion, skillContent);
@@ -1068,6 +1072,7 @@ export function registerEvalCommand(program: Command): void {
             ) {
               runHadFailure = true;
             }
+            if (judgeDead) deadJudgeSeen = true;
             if (deadJudgeReason && !opts.json) {
               console.log(`  ${icon("error")} ${deadJudgeReason}`);
             }
@@ -1341,6 +1346,13 @@ export function registerEvalCommand(program: Command): void {
         } else {
           console.log(chalk.dim(`Duration: ${formatDuration(duration)} | DB: ${opts.db}`));
         }
+        // Exit contract: 0 = evaluated (pass/fail/advisory are VERDICTS and are
+        // reported in the bundle, not the exit status — the rollout gate
+        // decides); 2 = the judge was dead for at least one model, nothing was
+        // evaluated (bundle still written, signed `error`); 1 = crash (catch
+        // below). Set after every artifact is flushed so consumers still get
+        // the bundle + JSON.
+        if (deadJudgeSeen) process.exitCode = 2;
       } catch (err) {
         console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
         process.exit(1);
