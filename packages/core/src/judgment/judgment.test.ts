@@ -281,7 +281,7 @@ describe("judgeCriteria — N-sample majority voting", () => {
         throw new Error("HTTP 401 authentication");
       },
     };
-    const criteria = [{ id: "c1", description: "d", method: "judge" as const, blocker: true }];
+    const criteria: Criterion[] = [criterion({ id: "c1", description: "d", method: "judge" })];
     const single = await judgeCriteria(criteria, makeOutcome("x"), dead);
     expect(single[0]!.verdict).toBe("unsure");
     expect(single[0]!.judge_error).toContain("401");
@@ -298,7 +298,7 @@ describe("judgeCriteria — N-sample majority voting", () => {
         throw new Error("HTTP 503");
       },
     };
-    const criteria = [{ id: "c1", description: "d", method: "judge" as const, blocker: true }];
+    const criteria: Criterion[] = [criterion({ id: "c1", description: "d", method: "judge" })];
     const r = await judgeCriteria(criteria, makeOutcome("x"), flaky, { samples: 3 });
     expect(r[0]!.judge_error).toBeUndefined();
     expect(r[0]!.reasoning).toContain("errored");
