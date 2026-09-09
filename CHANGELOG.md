@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Marketplace-ready JRig evaluator skill** — document the real five-of-seven
+  default, opt-in regression and naked-model checks, provider boundary, rollout
+  decisions, exit semantics, evidence bundle, and safe recovery workflow.
 - **Nightly skill-eval roster 13→14** — pin CCPI merge `a9dd5c02` and add
   `skill-creator` after its hand-authored `eval-spec.yaml` landed
   ([#234](https://github.com/jeremylongshore/j-rig-skill-binary-eval/pull/234)).
@@ -24,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Patched CLI YAML parser** — override `gray-matter`'s compatible `js-yaml`
+  dependency to 3.15.2 or newer, clearing the quadratic-CPU advisories reported
+  by the production dependency audit.
 - **A dead judge provider now signs `error`, never `advisory`** (`packages/cli/src/commands/eval.ts`,
   `packages/core/src/judgment/{engine,types}.ts`). Found by the 2026-09 conference audit's
   "make it lie" battery: with a garbage `MINIMAX_API_KEY`, every judge call returned HTTP 401,
